@@ -1,0 +1,17 @@
+---
+# Base NGINX with small page example
+
+version: "3.8"
+services:
+  service1:
+    image: ${REGISTRY_URI}ecs-sd-sc-demo:${TAG:-latest}
+    ports:
+      - protocol: tcp
+        published: 8080
+        target: 3000
+  service2:
+    image: ${REGISTRY_URI}ecs-sd-sc-demo:${TAG:-latest}
+    ports:
+      - protocol: tcp
+        published: 8081
+        target: 3000

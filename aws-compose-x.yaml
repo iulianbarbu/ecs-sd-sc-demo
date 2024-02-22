@@ -1,0 +1,59 @@
+---
+# Compose-X config file for Networking, where we define DNS Settings and an ALB to send traffic to our application
+
+# x-cluster:
+#   Lookup: ecs-sd-sc-demo
+
+services:
+  service2:
+    x-ecr:
+      InterpolateWithDigest: true
+  service1:
+    x-ecr:
+      InterpolateWithDigest: true
+
+# We need DNS information. We indicate which DNS zone to use publicly and which one to use in the VPC.
+# Given that we do not indicate Lookup, the new DNS Zones will be created.
+
+x-cloudmap:
+  PrivateNamespace:
+    ZoneName: cluster.internal
+    # Lookup: true
+
+# x-vpc:
+#   Lookup:
+#     VpcId:
+#       Identifier: vpc-002ac46adb932c16d
+#       Region: eu-west-2
+#     AppSubnets:
+#       Identifier: subnet-01f1eeb9fb800f4f7
+#       Identifier: subnet-00603a85d6c12e708
+#       Region: eu-west-2
+#     StorageSubnets:
+#       Identifier: subnet-0681081ee084c785a
+#       Identifier: subnet-0d5916d40d2ee18f9
+#       Region: eu-west-2
+#     PublicSubnets:
+#       Identifier: subnet-04bf736150de7ae93
+#       Identifier: subnet-0d01c92e37a98f11f
+#       Region: eu-west-2
+
+# We create an ALB and send traffic to our frontend. Note that the listener is not encrypted at this point.
+# To use encryption we need n ACM certificate and set the listener protocol to HTTPS
+
+x-elbv2:
+  public-alb-service1:
+    Properties:
+      Scheme: internet-facing
+      Type: application
+    Services:
+      - name: service1:service1
+        port: 3000
+        protocol: HTTP
+        healthcheck: 3000:HTTP
+    Listeners:
+      - Port: 3000
+        Protocol: HTTP
+        Targets:
+          - name: service1:service1
+            access: /
